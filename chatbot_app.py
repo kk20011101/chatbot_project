@@ -1,21 +1,24 @@
+# chatbot_app.py の修正箇所
+
 import streamlit as st
 from openai import OpenAI
 import os
-from dotenv import load_dotenv # 👈 これを追加
+# from dotenv import load_dotenv # 👈 load_dotenv の行は不要なので削除するかコメントアウト
 
 # ----------------------------------------------------
-# 0. .envファイルから環境変数をロード
-load_dotenv()
-# ----------------------------------------------------
+# 0. .envファイルから環境変数をロード (削除またはコメントアウト)
+# load_dotenv() 
 
 # 1. OpenAIクライアントの初期化
-# 環境変数からAPIキーを読み込みます
 try:
-    # load_dotenv() でロードされたキーが os.environ に設定される
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY")) 
+    # 修正後: Streamlit Secretsからキーを読み込む
+    # Streamlit Cloudで設定するキー名に合わせて "openai_api_key" に変更
+    client = OpenAI(api_key=st.secrets["openai_api_key"]) 
 except Exception as e:
-    st.error("OpenAI APIキーが見つからないか、クライアントの初期化に失敗しました。'.env'ファイルを確認してください。")
+    st.error("OpenAI APIキーが見つからないか、クライアントの初期化に失敗しました。Streamlit CloudのSecretsを確認してください。")
     st.stop()
+
+# ... 以下のコードは変更なし ...
 
 
 # 2. 知識源となるテキストデータの読み込み
