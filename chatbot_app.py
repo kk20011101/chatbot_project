@@ -68,7 +68,7 @@ def get_bot_response(user_prompt):
 
 
 # 4. Streamlit UIの構築
-st.title("ウェブサイト情報ベースのチャットボット 💬")
+st.title("東京確率論セミナーのチャットボット 💬")
 
 # チャット履歴の初期化
 if "messages" not in st.session_state:
