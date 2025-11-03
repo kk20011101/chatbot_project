@@ -1,0 +1,3 @@
+# .envファイルと、デプロイ時にStreamlitが生成するフォルダを除外
+.env
+.streamlit/
