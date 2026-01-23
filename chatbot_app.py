@@ -10,7 +10,7 @@ import streamlit as st
 # 1. Gemini クライアントの初期化
 try:
     genai.configure(api_key=st.secrets["gemini_api_key"])
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-pro")
 except Exception as e:
     st.error("Gemini APIキーが見つからないか、初期化に失敗しました。Streamlit Secretsを確認してください。")
     st.stop()
