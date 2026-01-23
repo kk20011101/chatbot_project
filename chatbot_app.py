@@ -35,14 +35,14 @@ def get_bot_response(user_prompt):
     )
 
     payload = {
-        "model": "mistralai/Mistral-7B-Instruct-v0.2",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        "temperature": 0.1,
-        "max_tokens": 512,
-    }
+    "model": "google/gemma-2-2b-it",
+    "messages": [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ],
+    "temperature": 0.1,
+    "max_tokens": 512,
+}
 
     response = requests.post(
         HF_API_URL,
