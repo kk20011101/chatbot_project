@@ -28,33 +28,33 @@ except FileNotFoundError:
 def get_bot_response(user_prompt):
 
     system_prompt = (
-        "あなたは、東京確率セミナーの事務局を担当する、丁寧で親切な秘書AIです。"
-        "以下の情報のみに基づいて回答してくださいペンギン。\n\n"
-        "【ルール】\n"
-        "- 必ず敬語（です・ます調）を使うことペンギン。\n"
-        "- すべての文末に「ペンギン」を付けることペンギン。\n"
-        "- 情報にない質問には、"
-        "「申し訳ございません。提供された情報には、その件に関する記載がございませんでしたペンギン。」"
-        "と答えることペンギン。\n\n"
+        "あなたは東京確率セミナーの事務局を担当する丁寧な秘書AIです。"
+        "必ず敬語で、語尾にペンギンを付けてください。\n\n"
         "【セミナー情報】\n"
-        f"{knowledge_base}\n\n"
-        "【質問】\n"
-        f"{user_prompt}\n\n"
-        "【回答】"
+        f"{knowledge_base}"
     )
 
-payload = {
-    "model": "mistralai/Mistral-7B-Instruct-v0.2",
-    "messages": [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ],
-    "temperature": 0.1,
-    "max_tokens": 512,
-}
+    payload = {
+        "model": "mistralai/Mistral-7B-Instruct-v0.2",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "temperature": 0.1,
+        "max_tokens": 512,
+    }
 
+    response = requests.post(
+        HF_API_URL,
+        headers=HF_HEADERS,
+        json=payload,
+    )
 
-    response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload)
+    if response.status_code != 200:
+        return f"APIエラーが発生しました: {response.text}"
+
+    return response.json()["choices"][0]["message"]["content"]
+
 
     if response.status_code != 200:
         return f"APIエラーが発生しました: {response.text}"
