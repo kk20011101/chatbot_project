@@ -4,7 +4,7 @@ import requests
 # =========================
 # 1. Hugging Face API 設定
 # =========================
-HF_API_URL = "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta"
+HF_API_URL = "https://router.huggingface.co/v1/chat/completions"
 
 HF_HEADERS = {
     "Authorization": f"Bearer {st.secrets['hf_api_token']}",
@@ -43,14 +43,16 @@ def get_bot_response(user_prompt):
         "【回答】"
     )
 
-    payload = {
-        "inputs": system_prompt,
-        "parameters": {
-            "temperature": 0.1,
-            "max_new_tokens": 512,
-            "return_full_text": False
-        }
-    }
+payload = {
+    "model": "mistralai/Mistral-7B-Instruct-v0.2",
+    "messages": [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ],
+    "temperature": 0.1,
+    "max_tokens": 512,
+}
+
 
     response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload)
 
