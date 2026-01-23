@@ -1,82 +1,65 @@
 import streamlit as st
-import requests
+from openai import OpenAI
 
-# =========================
-# 1. Hugging Face API 設定
-# =========================
-HF_API_URL = "https://router.huggingface.co/v1/chat/completions"
+# ----------------------------------------------------
+# OpenAI クライアント初期化
+try:
+    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+except Exception:
+    st.error("OpenAI APIキーが設定されていません。Streamlit Secrets を確認してください。")
+    st.stop()
 
-HF_HEADERS = {
-    "Authorization": f"Bearer {st.secrets['hf_api_token']}",
-    "Content-Type": "application/json",
-}
-
-# =========================
-# 2. 知識ベース読み込み
-# =========================
+# ----------------------------------------------------
+# 知識ベース読み込み
 KNOWLEDGE_FILE = "website_data.txt"
 try:
     with open(KNOWLEDGE_FILE, "r", encoding="utf-8") as f:
         knowledge_base = f.read()
 except FileNotFoundError:
-    st.error("website_data.txt が見つかりません。")
+    st.error(f"'{KNOWLEDGE_FILE}' が見つかりません。")
     st.stop()
 
-# =========================
-# 3. 応答生成
-# =========================
+# ----------------------------------------------------
+# 応答生成
 def get_bot_response(user_prompt):
 
     system_prompt = (
-        "あなたは東京確率セミナーの事務局を担当する丁寧な秘書AIです。"
-        "必ず敬語で、語尾にペンギンを付けてください。\n\n"
+        "あなたは、**東京確率セミナーの事務局を担当する、丁寧で親切な秘書AI**です。"
+        "以下に提供されたセミナー情報のみに基づいて回答してくださいペンギン。\n\n"
+        "【ルール】\n"
+        "- 常に敬語ですペンギン\n"
+        "- 語尾に必ず「ペンギン」を付けますペンギン\n"
+        "- 情報がなければ、"
+        "「申し訳ございません。提供された情報には、その件に関する記載がございませんでしたペンギン。」"
+        "と答えますペンギン\n\n"
         "【セミナー情報】\n"
         f"{knowledge_base}"
     )
 
-    payload = {
-    "model": "google/gemma-2-2b-it",
-    "messages": [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ],
-    "temperature": 0.1,
-    "max_tokens": 512,
-}
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.1,
+        )
+        return response.choices[0].message.content
 
-    response = requests.post(
-        HF_API_URL,
-        headers=HF_HEADERS,
-        json=payload,
-    )
+    except Exception as e:
+        return f"応答の生成中にエラーが発生しました: {e}"
 
-    if response.status_code != 200:
-        return f"APIエラーが発生しました: {response.text}"
-
-    return response.json()["choices"][0]["message"]["content"]
-
-
-    if response.status_code != 200:
-        return f"APIエラーが発生しました: {response.text}"
-
-    result = response.json()
-
-    if isinstance(result, list):
-        return result[0]["generated_text"]
-    else:
-        return "応答の生成に失敗しました。"
-
-# =========================
-# 4. Streamlit UI
-# =========================
+# ----------------------------------------------------
+# Streamlit UI
 st.title("東京確率論セミナーのチャットボット 💬")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
 if prompt := st.chat_input("質問を入力してください"):
     st.session_state.messages.append({"role": "user", "content": prompt})
